@@ -1,8 +1,19 @@
 import './App.css'
 import {useState} from 'react';
 
+type ItemsType = {
+    id: number
+    title: string
+}
+
+type BoardType = {
+    id: number,
+    title: string,
+    items: ItemsType[]
+}
+
 function App() {
-    const [board, setBoard] = useState([
+    const [board, setBoard] = useState<BoardType[]>([
         {
             id: 1,
             title: "Сделать",
@@ -23,25 +34,62 @@ function App() {
         }
     ])
 
-    function dragOverHandler(e: React.DragEvent<HTMLDivElement>, board, item) {
+    const [currentBoard, setCurrentBoard] = useState<BoardType | null>(null)
+    const [currentItem, setCurrentItem] = useState<ItemsType | null>(null)
+
+    function dragOverHandler(e: React.DragEvent<HTMLDivElement>) {
         e.preventDefault()
+        if(e.currentTarget.className === 'item') {
+            e.currentTarget.style.boxShadow = '0 2px 3px gray'
+        }
     }
 
     function dragLeaveHandler(e: React.DragEvent<HTMLDivElement>) {
-
+        e.currentTarget.style.boxShadow = 'none'
     }
 
-    function dragStartHandler(e: React.DragEvent<HTMLDivElement>) {
-
+    function dragStartHandler(e: React.DragEvent<HTMLDivElement>, board: BoardType, item: ItemsType) {
+        setCurrentBoard(board)
+        setCurrentItem(item)
     }
 
     function dragEndHandler(e: React.DragEvent<HTMLDivElement>) {
-
+        e.currentTarget.style.boxShadow = 'none'
     }
 
-    function dropHandler(e: React.DragEvent<HTMLDivElement>, board, item) {
-        e.preventDefault()
+    function dropHandler(e: React.DragEvent<HTMLDivElement>, dropBoard: BoardType, item: ItemsType) {
+        e.preventDefault();
+        if (!currentBoard || !currentItem) return;
+
+        const currentIndex = currentBoard.items.findIndex(i => i.id === currentItem.id);
+        const dropIndex = dropBoard.items.findIndex(i => i.id === item.id);
+
+        if (currentIndex === -1 || dropIndex === -1) return;
+
+        const newBoards = board.map(b => {
+            if (b.id === currentBoard.id) {
+                return {
+                    ...b,
+                    items: b.items.filter(i => i.id !== currentItem.id)
+                };
+            }
+
+            if (b.id === dropBoard.id) {
+                const newItems = [...b.items];
+                newItems.splice(dropIndex + 1, 0, currentItem);
+                return {
+                    ...b,
+                    items: newItems
+                };
+            }
+
+            return b;
+        });
+
+        setBoard(newBoards);
     }
+
+
 
     return (
         <div className='app'>
@@ -50,9 +98,9 @@ function App() {
                     <div className='board__title'>{board.title}</div>
                     {board.items.map(item =>
                         <div
-                            onDragOver={(e) => dragOverHandler(e, board, item)}
+                            onDragOver={(e) => dragOverHandler(e)}
                             onDragLeave={(e) => dragLeaveHandler(e)}
-                            onDragStart={(e) => dragStartHandler(e)}
+                            onDragStart={(e) => dragStartHandler(e, board, item)}
                             onDragEnd={(e) => dragEndHandler(e)}
                             onDrop={(e) => dropHandler(e, board, item)}
                             draggable={true}
@@ -63,21 +111,6 @@ function App() {
                     )}
                 </div>
             )}
-            {/*className='board'>
-              <div className='board__title'>Сделать</div>
-              <div className='item'>Пойти в магазин</div>
-          </div>
-          <div className='board'>
-              <div className='board__title'>Проверить</div>
-              <div className='i<divtem'>Задачи</div>
-          </div>
-          <div className='board'>
-              <div className='board__title'>Сделано</div>
-              <div className='item'>Покушать</div>
-              <div className='item'>Покушать</div>
-              <div className='item'>Покушать</div>
-              <div className='item'>Покушать</div>
-          </div>*/}
         </div>
     )
 }
