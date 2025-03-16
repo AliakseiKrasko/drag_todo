@@ -1,34 +1,39 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
+import {useState} from 'react';
 
 function App() {
-  const [count, setCount] = useState(0)
+const [board, setBoard] = useState([
+    {id: 1, title: "Сделать", items: [{id: 1, title: "Пойти в магазин"}, {id: 2, title: "Выкинуть мусор"}, {id: 3, title: "Покушать"}]},
+    {id: 2, title: "Проверить", items: [{id: 4, title: "Код ревью"}, {id: 5, title: "Задача на факториал"}, {id: 6, title: "Задачи на фибоначи"}]},
+    {id: 3, title: "Сделано", items: [{id: 1, title: "Снять видио"}, {id: 7, title: "Смонтировать"}, {id: 8, title: "Отрендорить"}]}
+])
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <div className='app'>
+          {board.map((board) =>
+              <div className='board'>
+                  <div className='board__title'>{board.title}</div>
+                  {board.items.map(item =>
+                      <div className='item'>{item.title}</div>
+                  )}
+              </div>
+           )}
+           {/*className='board'>
+              <div className='board__title'>Сделать</div>
+              <div className='item'>Пойти в магазин</div>
+          </div>
+          <div className='board'>
+              <div className='board__title'>Проверить</div>
+              <div className='i<divtem'>Задачи</div>
+          </div>
+          <div className='board'>
+              <div className='board__title'>Сделано</div>
+              <div className='item'>Покушать</div>
+              <div className='item'>Покушать</div>
+              <div className='item'>Покушать</div>
+              <div className='item'>Покушать</div>
+          </div>*/}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
   )
 }
 
