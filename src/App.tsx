@@ -13,7 +13,7 @@ type BoardType = {
 }
 
 function App() {
-    const [board, setBoard] = useState<BoardType[]>([
+    const [boards, setBoards] = useState<BoardType[]>([
         {
             id: 1,
             title: "Сделать",
@@ -30,7 +30,7 @@ function App() {
         {
             id: 3,
             title: "Сделано",
-            items: [{id: 1, title: "Снять видио"}, {id: 7, title: "Смонтировать"}, {id: 8, title: "Отрендорить"}]
+            items: [{id: 7, title: "Снять видио"}, {id: 8, title: "Смонтировать"}, {id: 9, title: "Отрендорить"}]
         }
     ])
 
@@ -48,7 +48,7 @@ function App() {
         e.currentTarget.style.boxShadow = 'none'
     }
 
-    function dragStartHandler(e: React.DragEvent<HTMLDivElement>, board: BoardType, item: ItemsType) {
+    function dragStartHandler(_e: React.DragEvent<HTMLDivElement>, board: BoardType, item: ItemsType) {
         setCurrentBoard(board)
         setCurrentItem(item)
     }
@@ -57,47 +57,59 @@ function App() {
         e.currentTarget.style.boxShadow = 'none'
     }
 
-    function dropHandler(e: React.DragEvent<HTMLDivElement>, dropBoard: BoardType, item: ItemsType) {
+    function dropHandler(e: React.DragEvent<HTMLDivElement>, board: BoardType, item: ItemsType) {
         e.preventDefault();
         if (!currentBoard || !currentItem) return;
 
         const currentIndex = currentBoard.items.findIndex(i => i.id === currentItem.id);
-        const dropIndex = dropBoard.items.findIndex(i => i.id === item.id);
 
-        if (currentIndex === -1 || dropIndex === -1) return;
-
-        const newBoards = board.map(b => {
-            if (b.id === currentBoard.id) {
-                return {
-                    ...b,
-                    items: b.items.filter(i => i.id !== currentItem.id)
-                };
+        currentBoard.items.splice(currentIndex, 1)
+        const drobIndex = board.items.indexOf(item)
+        board.items.splice(drobIndex + 1, 0, currentItem)
+        setBoards(boards.map(b => {
+            if(b.id === board.id){
+                return board
             }
-
-            if (b.id === dropBoard.id) {
-                const newItems = [...b.items];
-                newItems.splice(dropIndex + 1, 0, currentItem);
-                return {
-                    ...b,
-                    items: newItems
-                };
+            if(b.id === currentBoard.id){
+                return currentBoard
             }
-
-            return b;
-        });
-
-        setBoard(newBoards);
+            return b
+        }))
+        e.currentTarget.style.boxShadow = 'none'
     }
 
+    function dropCardHandler(e: React.DragEvent<HTMLDivElement>, board: BoardType) {
+        if (currentItem) {
+            board.items.push(currentItem)
+        }
+        if (!currentBoard || !currentItem) return;
 
+        const currentIndex = currentBoard.items.findIndex(i => i.id === currentItem.id);
+
+        currentBoard.items.splice(currentIndex, 1)
+        setBoards(boards.map(b => {
+            if(b.id === board.id){
+                return board
+            }
+            if(b.id === currentBoard.id){
+                return currentBoard
+            }
+            return b
+        }))
+        e.currentTarget.style.boxShadow = 'none'
+    }
 
     return (
         <div className='app'>
-            {board.map((board) =>
-                <div className='board'>
+            {boards.map((board) =>
+                <div
+                    onDragOver={(e) => dragOverHandler(e)}
+                    onDrop={(e) => dropCardHandler(e, board)}
+                    className='board'>
                     <div className='board__title'>{board.title}</div>
                     {board.items.map(item =>
                         <div
+                            key={item.id}
                             onDragOver={(e) => dragOverHandler(e)}
                             onDragLeave={(e) => dragLeaveHandler(e)}
                             onDragStart={(e) => dragStartHandler(e, board, item)}
